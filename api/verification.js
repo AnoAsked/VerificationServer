@@ -29,7 +29,11 @@ async function sendVerificationCode(email) {
                 text: `Your confirmation code is: ${data[0].code}`,
             });
             console.log("Email sent: %s", info.messageId);
+        }else{
+            throw {status : "FAILED", message : "User with provided email does not exists."}; 
         }
+    }).catch(() => {
+        throw {status : "FAILED", message : "An error occured while sending the confirmation email."}; 
     })
 }
 
@@ -59,8 +63,8 @@ router.post('/verify', async (req, res) => {
                 } catch (err) {
                     console.error(err)
                     res.status(200).json({
-                        status: "FAILED",
-                        message: "An error occured while sending the confirmation email."
+                        status: err.status,
+                        message: err.message
                     })
                 }
             }).catch(err => {
@@ -140,8 +144,8 @@ router.post('/resend', async (req, res) => {
     } catch (err) {
         console.error(err)
         res.status(200).json({
-            status: "FAILED",
-            message: "An error occured while resending the confirmation email."
+            status: err.status,
+            message: err.message
         })
     }
 })
