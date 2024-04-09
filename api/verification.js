@@ -17,23 +17,26 @@ const transporter = nodemailer.createTransport({
 });
 
 async function sendVerificationCode(email) {
-    User.find({email: email}).then(async data => {
-        if(data[0]){
-            const info = await transporter.sendMail({
-                from: {
-                name: "Ano",
-                address: process.env.GMAIL_USER
-                },
-                to: email,
-                subject: "AnoAsked confirmation ✔",
-                text: `Your confirmation code is: ${data[0].code}`,
-            });
-            console.log("Email sent: %s", info.messageId);
-        }else{
-            throw {status : "FAILED", message : "User with provided email does not exists."}; 
-        }
-    }).catch(() => {
-        throw {status : "FAILED", message : "An error occured while sending the confirmation email."}; 
+    return new Promise((resolve, reject) => {
+        User.find({email: email}).then(async data => {
+            if(data[0]){
+                const info = await transporter.sendMail({
+                    from: {
+                    name: "Ano",
+                    address: process.env.GMAIL_USER
+                    },
+                    to: email,
+                    subject: "AnoAsked confirmation ✔",
+                    text: `Your confirmation code is: ${data[0].code}`,
+                });
+                console.log("Email sent: %s", info.messageId);
+                resolve()
+            }else{
+                reject("User with provided email does not exists.")
+            }
+        }).catch(() => {
+            reject("An error occured while sending the confirmation email.") 
+        })
     })
 }
 
@@ -54,20 +57,20 @@ router.post('/verify', async (req, res) => {
                 code: `${Math.floor(1000 + Math.random() * 9000)}`
             })
             user.save().then(() => {
-                try {
-                    sendVerificationCode(email)
-                    res.status(201).json({
-                        status: "SUCCESS",
-                        message: "Verification email has been sent."
-                    })
-                } catch (err) {
-                    console.error(err)
-                    res.status(200).json({
-                        status: err.status,
-                        message: err.message
+                    sendVerificationCode(email).then(() => {
+                        res.status(201).json({
+                            status: "SUCCESS",
+                            message: "Verification email has been sent."
+                        })
+                    }).catch(err => {
+                        console.error(err)
+                        res.status(200).json({
+                            status: "FAILED",
+                            message: err
+                        })
                     })
                 }
-            }).catch(err => {
+            ).catch(err => {
                 console.error(err);
                 res.status(200).json({
                     status: "FAILED",
@@ -104,7 +107,6 @@ router.post('/confirm', async (req, res) => {
                             message: "Email has been confirmed."
                         })
                     }).catch(err => {
-                        console.error(err)
                         res.status(200).json({
                             status: "FAILED",
                             message: "An error occured while confirming the email."
@@ -135,19 +137,17 @@ router.post('/confirm', async (req, res) => {
 router.post('/resend', async (req, res) => {
     const { email } = req.body;
 
-    try {
-        sendVerificationCode(email)
+    sendVerificationCode(email).then(() => {
         res.status(201).json({
             status: "SUCCESS",
             message: "Verification email has been resent."
         })
-    } catch (err) {
-        console.error(err)
+    }).catch(err => {
         res.status(200).json({
-            status: err.status,
-            message: err.message
+            status: "FAILED",
+            message: err
         })
-    }
+    })
 })
 
 router.post('/check', async (req, res) => {
