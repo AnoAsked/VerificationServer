@@ -59,7 +59,7 @@ router.post('/verify', async (req, res) => {
             user.save().then(() => {
                     sendVerificationCode(email).then(() => {
                         res.status(201).json({
-                            status: "SUCCESS",
+                            status: "PENDING",
                             message: "Verification email has been sent."
                         })
                     }).catch(err => {
@@ -103,7 +103,7 @@ router.post('/confirm', async (req, res) => {
                 if(user[0].code == code){
                     User.findOneAndUpdate({email: email}, {verified: true}).then(() => {
                         res.status(200).json({
-                            status: "CONFIRMED",
+                            status: "VERIFIED",
                             message: "Email has been confirmed."
                         })
                     }).catch(err => {
@@ -139,7 +139,7 @@ router.post('/resend', async (req, res) => {
 
     sendVerificationCode(email).then(() => {
         res.status(201).json({
-            status: "SUCCESS",
+            status: "PENDING",
             message: "Verification email has been resent."
         })
     }).catch(err => {
