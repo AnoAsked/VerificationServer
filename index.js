@@ -8,13 +8,10 @@ const verificationRouter = require('./api/verification')
 
 const bodyParser = require('express').json;
 const cors = require('cors')
+app.use(cors({
+    origin: ['http://localhost:5173', 'https://anoasked-git-dev-simon-masooglus-projects.vercel.app/auth', 'https://anoasked.vercel.app']
+}));
 app.use(bodyParser());
 app.use('/verification', verificationRouter);
-app.use(cors());
-app.use(function(req, res, next) {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-    next();
-});
 
 app.listen(port, () => console.log(`AnoAsked verification server running on port: ${port}`))
