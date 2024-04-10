@@ -114,7 +114,7 @@ router.post('/confirm', async (req, res) => {
                     })
                 }else{
                     res.status(200).json({
-                        status: "FAILED",
+                        status: "PENDING",
                         message: "Provided confirmation code does not match."
                     })
                 }
