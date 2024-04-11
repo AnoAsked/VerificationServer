@@ -137,17 +137,7 @@ router.post('/confirm', async (req, res) => {
 router.post('/resend', async (req, res) => {
     const { username, email } = req.body;
 
-    User.find({username: username}).then(async user => {
-        if(user[0]){
-            if(user[0].email != email){
-                User.updateOne({username: username}, {email: email}).then(() => resolve()).catch(() => reject("An error occured while updating users email."))
-            }
-        }else{
-            reject("Provided user was not found.")
-        }
-    }).catch(() => {
-        reject("An error occured while searching for the user.") 
-    })
+    User.updateOne({username: username}, {email: email}).then(() => resolve()).catch(() => reject("An error occured while updating users email."))
 
     sendVerificationCode(email).then(() => {
         res.status(201).json({
