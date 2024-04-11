@@ -154,14 +154,14 @@ router.post('/resend', async (req, res) => {
                     })
                 }).catch(() => {
                     res.status(200).json({
-                        status: "FAILED",
+                        status: "PENDING",
                         message: "An error occured while updating users email."
                     })
                 })
             }
         }else{
             res.status(200).json({
-                status: "FAILED",
+                status: "PENDING",
                 message: "Provided user was not found."
             })
         }
