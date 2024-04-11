@@ -137,17 +137,38 @@ router.post('/confirm', async (req, res) => {
 router.post('/resend', async (req, res) => {
     const { username, email } = req.body;
 
-    User.updateOne({username: username}, {email: email}).then(() => resolve()).catch(() => reject("An error occured while updating users email."))
-
-    sendVerificationCode(email).then(() => {
-        res.status(201).json({
-            status: "PENDING",
-            message: "Verification email has been resent."
-        })
-    }).catch(err => {
+    User.find({username: username}).then(async user => {
+        if(user[0]){
+            if(user[0].email != email){
+                User.updateOne({username: username}, {email: email}).then(() => {
+                    sendVerificationCode(email).then(() => {
+                        res.status(200).json({
+                            status: "PENDING",
+                            message: "Verification email has been resent."
+                        })
+                    }).catch(err => {
+                        res.status(200).json({
+                            status: "FAILED",
+                            message: err
+                        })
+                    })
+                }).catch(() => {
+                    res.status(200).json({
+                        status: "FAILED",
+                        message: "An error occured while updating users email."
+                    })
+                })
+            }
+        }else{
+            res.status(200).json({
+                status: "FAILED",
+                message: "Provided user was not found."
+            })
+        }
+    }).catch(() => {
         res.status(200).json({
             status: "FAILED",
-            message: err
+            message: "An error occured while searching for the user."
         })
     })
 })
