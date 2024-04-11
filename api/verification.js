@@ -144,7 +144,7 @@ router.post('/resend', async (req, res) => {
                     sendVerificationCode(email).then(() => {
                         res.status(200).json({
                             status: "PENDING",
-                            message: "Verification email has been resent."
+                            message: "Verification email has been resent to a new email."
                         })
                     }).catch(err => {
                         res.status(200).json({
@@ -156,6 +156,18 @@ router.post('/resend', async (req, res) => {
                     res.status(200).json({
                         status: "PENDING",
                         message: "An error occured while updating users email."
+                    })
+                })
+            }else{
+                sendVerificationCode(email).then(() => {
+                    res.status(200).json({
+                        status: "PENDING",
+                        message: "Verification email has been resent."
+                    })
+                }).catch(err => {
+                    res.status(200).json({
+                        status: "FAILED",
+                        message: err
                     })
                 })
             }
